@@ -15,8 +15,9 @@ const getLocalData = () =>{
 const Todo = () => {
 
     const[inputData, setInputData] = useState("");
-
     const[itemArray, setItemArray] = useState(getLocalData());
+    const[isEditItem, setIsEditItem] = useState("");
+    const [toggleButton, setToggleButton] = useState(false);
 
 
     //Add item function
@@ -24,7 +25,22 @@ const Todo = () => {
 
         if(!inputData){
             alert("Please enter a valid value");
-        }else{
+        }else if(inputData && toggleButton){
+
+            setItemArray(
+                itemArray.map((currElement)=>{
+                    if(currElement.id == isEditItem){
+                        return{...currElement, name:inputData}
+                    }else{
+                        return currElement;
+                    }
+                })
+            )
+            setInputData("");
+        setIsEditItem(null);
+        setToggleButton(false);
+        }
+        else{
             const newItem = {
                 id: new Date().getTime().toString(),
                 name : inputData
@@ -41,6 +57,19 @@ const Todo = () => {
             return item.id != itemId
         })
         setItemArray(updatedItems);
+    }
+
+
+    //edit an item
+    const editItem = (itemId) =>{
+
+        const item_to_do_edited = itemArray.find((currElement)=>{
+            return currElement.id == itemId;
+        });
+
+        setInputData(item_to_do_edited.name);
+        setIsEditItem(itemId);
+        setToggleButton(true);
     }
 
     //delete All Item
@@ -67,7 +96,13 @@ const Todo = () => {
                 </figure>
                 <div className="addItems">
                     <input type="text" placeholder = "✍️ Add Item" className = "form-control"  value = {inputData} onChange={(e)=>{setInputData(e.target.value)}}/>
-                    <i className="fa fa-plus add-btn" onClick={addItem}></i>
+                    {
+                        toggleButton ?
+                        <i className="far fa-edit add-btn" onClick={addItem}></i>
+                        :
+                        <i className="fa fa-plus add-btn" onClick={addItem}></i>
+                    }
+                    
                 </div>
                 {/* {show all items} */}
 
@@ -78,7 +113,7 @@ const Todo = () => {
                             <div className="eachItem" key={index}>
                             <h3>{item.name}</h3>
                             <div className="todo-btn">
-                        <i className="far fa-edit add-btn"></i>
+                        <i className="far fa-edit add-btn" onClick={()=>editItem(item.id)}></i>
                         <i className="far fa-trash-alt add-btn" onClick={()=>deleteItem(item.id)}></i>
                             </div>
                         </div>)
